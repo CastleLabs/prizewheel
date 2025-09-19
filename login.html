@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prize Wheel Admin Login - FINAL</title>
+    <title>Prize Wheel Admin Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
@@ -317,7 +317,7 @@
         }
 
         .security-indicator::before {
-            content: 'ðŸ”’';
+            content: '🔒';
             font-size: 14px;
         }
 
@@ -419,7 +419,7 @@
 
     <div class="login-container">
         <div class="login-header">
-            <div class="wheel-icon" aria-label="Prize wheel icon">ðŸŽ°</div>
+            <div class="wheel-icon" aria-label="Prize wheel icon">🎰</div>
             <h1>Prize Wheel Admin</h1>
             <p>Secure administrative access required</p>
         </div>
@@ -471,7 +471,7 @@
             Password: <code>admin123</code>
             
             <div class="warning">
-                âš ï¸ Change these credentials immediately after first login for security!
+                ⚠️ Change these credentials immediately after first login for security!
             </div>
         </div>
     </div>
@@ -649,7 +649,7 @@
                 }
             }, 500);
 
-            console.log('Prize Wheel Admin Login v2.0 - FINAL loaded (Pi 5 Compatible with Critical Fixes)');
+            console.log('Prize Wheel Admin Login v2.2 - FIXED (Pi 5 Compatible)');
         });
 
         // Handle form submission errors from server
@@ -668,15 +668,6 @@
             const particles = document.querySelectorAll('.particle');
             particles.forEach(particle => particle.remove());
         });
-
-        // Pi 5 specific optimizations
-        if ('serviceWorker' in navigator) {
-            // Register service worker for better performance on Pi 5
-            window.addEventListener('load', function() {
-                // This would be implemented for production PWA features
-                console.log('Prize Wheel System ready for Pi 5 service worker registration');
-            });
-        }
 
         // Handle network status for Pi 5 (might be on WiFi)
         window.addEventListener('online', function() {

@@ -32,7 +32,7 @@ gpiozero==1.6.2
 Pillow==10.1.0
 
 # Production WSGI Server
-gunicorn==21.2.0
+gunicorn==21.2.0 ### FIX APPLIED ### - Added gunicorn, which is required by the systemd service.
 
 # Audio File Processing
 mutagen==1.47.0

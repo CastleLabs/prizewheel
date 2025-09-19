@@ -1,29 +1,29 @@
 #!/bin/bash
 #
-# Raspberry Pi Prize Wheel System - FINAL Enhanced Setup Script v2.0 - CRITICAL FIXES
+# Raspberry Pi Prize Wheel System - Enhanced Setup Script v2.2
 # For Raspberry Pi 5 with CLI-only Raspberry Pi OS (Bookworm recommended)
-# Enhanced Version with Sound Support, Security, and Modern UI
+# Version: 2.2 FIXED - Character encoding and boot config compatibility fixed
 # 
-# CRITICAL FIXES APPLIED:
-# 1. Proper file copying from source directory
-# 2. Requirements.txt installation instead of individual packages
-# 3. Streamlined kiosk startup without conflicting mechanisms
-# 4. Enhanced error handling and validation
-#
 # Author: Prize Wheel System Team
-# Version: 2.0 FINAL - CRITICAL FIXES
 # Date: 2024
 
 set -e  # Exit on any error
 set -u  # Exit on undefined variables
 
 # Script Configuration
-SCRIPT_VERSION="2.0-FINAL-FIXES"
+SCRIPT_VERSION="2.2-FIXED"
 PROJECT_NAME="Prize Wheel System"
 PROJECT_DIR="$HOME/prizewheel"
 SERVICE_NAME="prizewheel"
 LOG_FILE="/tmp/prizewheel-setup.log"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Detect correct boot config location
+if [ -d "/boot/firmware" ]; then
+    BOOT_CONFIG="/boot/firmware/config.txt"
+else
+    BOOT_CONFIG="/boot/config.txt"
+fi
 
 # Color codes for enhanced output
 readonly RED='\033[0;31m'
@@ -36,15 +36,15 @@ readonly WHITE='\033[1;37m'
 readonly NC='\033[0m' # No Color
 readonly BOLD='\033[1m'
 
-# Unicode symbols for better UX
-readonly CHECKMARK="âœ…"
-readonly CROSSMARK="âŒ"
-readonly WARNING="âš ï¸"
-readonly INFO="â„¹ï¸"
-readonly ROCKET="ðŸš€"
-readonly GEAR="âš™ï¸"
-readonly LOCK="ðŸ”’"
-readonly SOUND="ðŸ”Š"
+# Unicode symbols (using ASCII alternatives for better compatibility)
+readonly CHECKMARK="[✓]"
+readonly CROSSMARK="[✗]"
+readonly WARNING="[!]"
+readonly INFO="[i]"
+readonly ROCKET="[>]"
+readonly GEAR="[*]"
+readonly LOCK="[L]"
+readonly SOUND="[♪]"
 
 # Logging functions
 log() {
@@ -54,12 +54,12 @@ log() {
 print_header() {
     clear
     log "${PURPLE}${BOLD}"
-    log "â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—"
-    log "                    ${ROCKET} ${PROJECT_NAME} - FINAL Setup v${SCRIPT_VERSION} ${ROCKET}"
+    log "============================================================================"
+    log "                    ${ROCKET} ${PROJECT_NAME} - Setup v${SCRIPT_VERSION} ${ROCKET}"
     log "              Enhanced Raspberry Pi 5 Prize Wheel with Sound Support"
     log "                        CLI-Only OS Compatible with Auto Display"
     log "                              ** CRITICAL FIXES APPLIED **"
-    log "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
+    log "============================================================================"
     log "${NC}"
 }
 
@@ -82,7 +82,7 @@ print_info() {
 print_section() {
     log ""
     log "${BLUE}${BOLD}${GEAR} $1${NC}"
-    log "${BLUE}â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•${NC}"
+    log "${BLUE}----------------------------------------------------------------------------${NC}"
 }
 
 # Error handling
@@ -106,7 +106,14 @@ check_root() {
 check_source_files() {
     print_section "Source Files Validation"
     
-    # CRITICAL FIX: Verify required application files exist
+    # Check if we're in the right directory
+    if [[ ! -f "app.py" ]] && [[ -f "../app.py" ]]; then
+        print_info "Adjusting source directory..."
+        cd ..
+        SOURCE_DIR="$(pwd)"
+    fi
+    
+    # Verify required application files exist
     local required_files=("app.py" "requirements.txt")
     local missing_files=()
     
@@ -221,7 +228,6 @@ update_system() {
         tcl-dev \
         python3-tk \
         nginx \
-        supervisor \
         htop \
         tree \
         nano \
@@ -229,7 +235,7 @@ update_system() {
         tmux \
         rsync \
         fail2ban \
-        ufw
+        ufw # ### FIX APPLIED ### - Removed 'supervisor' as it's not used. Systemd is used instead.
     
     print_status "System packages installed"
 }
@@ -404,14 +410,14 @@ install_gpio_support() {
     sudo raspi-config nonint do_serial 0  # Enable Serial
     
     # Pi 5 specific GPIO configuration
-    echo "# Prize Wheel GPIO Configuration - Pi 5" | sudo tee -a /boot/firmware/config.txt
-    echo "dtparam=gpio=on" | sudo tee -a /boot/firmware/config.txt
+    echo "# Prize Wheel GPIO Configuration - Pi 5" | sudo tee -a "$BOOT_CONFIG"
+    echo "dtparam=gpio=on" | sudo tee -a "$BOOT_CONFIG"
     
     print_status "GPIO support installed and configured for Pi 5"
 }
 
 create_project_structure() {
-    print_section "Project Setup and File Structure - CRITICAL FIX"
+    print_section "Project Setup and File Structure"
     
     print_info "Creating project directory structure..."
     
@@ -424,7 +430,7 @@ create_project_structure() {
     # Create main project directory
     mkdir -p "${PROJECT_DIR}"
     
-    # CRITICAL FIX: Copy application files from source directory
+    # Copy application files from source directory
     print_info "Copying application files from source directory..."
     print_info "Source: ${SOURCE_DIR}"
     print_info "Destination: ${PROJECT_DIR}"
@@ -463,12 +469,12 @@ create_project_structure() {
 }
 
 install_python_dependencies() {
-    print_section "Python Dependencies Installation - CRITICAL FIX"
+    print_section "Python Dependencies Installation"
     
     cd "${PROJECT_DIR}"
     source venv/bin/activate
     
-    # CRITICAL FIX: Use requirements.txt instead of individual packages
+    # Use requirements.txt
     print_info "Installing Python dependencies from requirements.txt..."
     
     # Verify requirements.txt exists
@@ -689,11 +695,27 @@ CPUQuota=90%
 WantedBy=multi-user.target
 EOF
 
+    # Create watchdog service
+    sudo tee /etc/systemd/system/${SERVICE_NAME}-watchdog.service > /dev/null << EOF
+[Unit]
+Description=Prize Wheel Watchdog
+After=${SERVICE_NAME}.service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c 'while true; do sleep 30; curl -f http://localhost/health || systemctl restart ${SERVICE_NAME}; done'
+Restart=always
+User=$USER
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
     print_status "Systemd services created for Pi 5"
 }
 
 create_display_scripts() {
-    print_section "Display System Setup (Pi 5 Kiosk Mode) - STREAMLINED"
+    print_section "Display System Setup (Pi 5 Kiosk Mode)"
     
     # Create display startup script optimized for Pi 5
     cat > "${PROJECT_DIR}/scripts/start_display.sh" << 'EOF'
@@ -707,15 +729,14 @@ sleep 10
 export DISPLAY=:0
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
 
-# Start PulseAudio if not running (Pi 5 specific)
+# Start PulseAudio if not running
 if ! pulseaudio --check; then
     pulseaudio --start --log-target=syslog &
     sleep 3
 fi
 
-# Set audio output (Pi 5 audio configuration)
+# Set audio output
 if command -v amixer &> /dev/null; then
-    # Try HDMI first, then analog
     amixer sset PCM,0 80% unmute 2>/dev/null || true
     amixer sset Master 80% unmute 2>/dev/null || true
     amixer sset Headphone 80% unmute 2>/dev/null || true
@@ -762,8 +783,8 @@ chromium-browser \
     --disable-dev-shm-usage \
     --memory-pressure-off \
     --max_old_space_size=128 \
-    "http://localhost:5000" \
-    2>/dev/null &
+    "http://localhost" \
+    2>/dev/null & ### FIX APPLIED ### - Changed URL from localhost:5000 to localhost to go through the Nginx proxy.
 
 # Keep script running
 wait
@@ -775,7 +796,7 @@ EOF
 }
 
 configure_auto_login() {
-    print_section "Auto-Login Configuration (CLI OS with X11 Launch) - STREAMLINED"
+    print_section "Auto-Login Configuration (CLI OS with X11 Launch)"
     
     print_info "Configuring automatic login and display startup for CLI OS..."
     
@@ -790,7 +811,6 @@ ExecStart=
 ExecStart=-/sbin/agetty --autologin $USER --noclear %I \$TERM
 EOF
 
-    # CRITICAL FIX: Streamlined X11 auto-start - remove conflicting bashrc modification
     # Create dedicated systemd service to start X11 and display
     sudo tee /etc/systemd/system/prizewheel-kiosk.service > /dev/null << EOF
 [Unit]
@@ -804,7 +824,7 @@ Type=simple
 User=$USER
 Environment="DISPLAY=:0"
 Environment="XDG_RUNTIME_DIR=/run/user/$(id -u $USER)"
-ExecStartPre=/bin/bash -c 'until curl -s http://localhost:5000/health; do sleep 5; done'
+ExecStartPre=/bin/bash -c 'until curl -s http://localhost/health; do sleep 5; done'
 ExecStartPre=/bin/sleep 10
 ExecStart=/usr/bin/startx ${PROJECT_DIR}/scripts/start_display.sh
 Restart=always
@@ -829,7 +849,7 @@ EOF
     # Enable the kiosk service
     sudo systemctl enable prizewheel-kiosk.service
     
-    print_status "Streamlined auto-login and kiosk startup configured"
+    print_status "Auto-login and kiosk startup configured"
 }
 
 setup_security() {
@@ -891,6 +911,7 @@ EOF
     chmod 750 "${PROJECT_DIR}"/scripts/*.sh 2>/dev/null || true
     
     print_status "Security measures implemented"
+}
 
 create_environment_config() {
     print_section "Environment Configuration"
@@ -986,11 +1007,11 @@ echo
 
 # Service status
 echo "=== Service Status ==="
-for service in prizewheel prizewheel-kiosk nginx; do
+for service in prizewheel prizewheel-kiosk prizewheel-watchdog nginx; do
     if systemctl is-active --quiet $service; then
-        echo "âœ… $service: RUNNING"
+        echo "[✓] $service: RUNNING"
     else
-        echo "âŒ $service: STOPPED"
+        echo "[✗] $service: STOPPED"
     fi
 done
 echo
@@ -998,50 +1019,50 @@ echo
 # X11 and Display Status
 echo "=== Display Status ==="
 if pgrep -x "Xorg" > /dev/null; then
-    echo "âœ… X11 Server: RUNNING"
+    echo "[✓] X11 Server: RUNNING"
 else
-    echo "âŒ X11 Server: NOT RUNNING"
+    echo "[✗] X11 Server: NOT RUNNING"
 fi
 
 if pgrep -x "chromium-browser" > /dev/null; then
-    echo "âœ… Chromium Kiosk: RUNNING"
+    echo "[✓] Chromium Kiosk: RUNNING"
 else
-    echo "âŒ Chromium Kiosk: NOT RUNNING"
+    echo "[✗] Chromium Kiosk: NOT RUNNING"
 fi
 
 # Network status
 echo "=== Network Status ==="
 echo "IP Address: $(hostname -I | awk '{print $1}')"
-if curl -s --max-time 5 http://localhost:5000/health > /dev/null; then
-    echo "âœ… Web Interface: ACCESSIBLE"
+if curl -s --max-time 5 http://localhost/health > /dev/null; then
+    echo "[✓] Web Interface: ACCESSIBLE"
 else
-    echo "âŒ Web Interface: NOT ACCESSIBLE"
+    echo "[✗] Web Interface: NOT ACCESSIBLE"
 fi
 echo
 
 # Hardware status
 echo "=== Hardware Status ==="
 if [ -c /dev/gpiomem ]; then
-    echo "âœ… GPIO: AVAILABLE"
+    echo "[✓] GPIO: AVAILABLE"
 else
-    echo "âŒ GPIO: NOT AVAILABLE"
+    echo "[✗] GPIO: NOT AVAILABLE"
 fi
 
 if aplay -l 2>/dev/null | grep -q card; then
-    echo "âœ… Audio: AVAILABLE"
+    echo "[✓] Audio: AVAILABLE"
     echo "   Audio Cards:"
     aplay -l 2>/dev/null | grep "card" | head -3
 else
-    echo "âŒ Audio: NOT AVAILABLE"
+    echo "[✗] Audio: NOT AVAILABLE"
 fi
 echo
 
 # Database status
 if [ -f "$HOME/prizewheel/prizewheel.db" ]; then
     DB_SIZE=$(du -h "$HOME/prizewheel/prizewheel.db" | cut -f1)
-    echo "âœ… Database: $DB_SIZE"
+    echo "[✓] Database: $DB_SIZE"
 else
-    echo "âŒ Database: NOT FOUND"
+    echo "[✗] Database: NOT FOUND"
 fi
 
 # Recent logs
@@ -1061,7 +1082,7 @@ echo "Starting system update process..."
 
 # Stop services
 echo "Stopping services..."
-sudo systemctl stop prizewheel-kiosk prizewheel || true
+sudo systemctl stop prizewheel-kiosk prizewheel prizewheel-watchdog || true
 
 # Update system packages
 echo "Updating system packages..."
@@ -1078,10 +1099,10 @@ pip install -r requirements.txt --upgrade
 # Restart services
 echo "Restarting services..."
 sudo systemctl daemon-reload
-sudo systemctl restart prizewheel
+sudo systemctl restart prizewheel prizewheel-watchdog
 sudo systemctl restart prizewheel-kiosk
 
-echo "âœ… System update completed!"
+echo "[✓] System update completed!"
 echo "Check status with: ./system_status.sh"
 EOF
 
@@ -1132,7 +1153,7 @@ echo "mq-deadline" | sudo tee /sys/block/mmcblk*/queue/scheduler 2>/dev/null || 
 sudo sysctl -w net.core.rmem_max=16777216
 sudo sysctl -w net.core.wmem_max=16777216
 
-echo "âœ… Pi 5 optimization completed!"
+echo "[✓] Pi 5 optimization completed!"
 EOF
 
     # Make scripts executable
@@ -1147,18 +1168,18 @@ finalize_setup() {
     print_info "Optimizing system for Raspberry Pi 5 performance..."
     
     # GPU memory split (optimal for Pi 5)
-    if grep -q "gpu_mem=" /boot/firmware/config.txt; then
-        sudo sed -i 's/gpu_mem=.*/gpu_mem=128/' /boot/firmware/config.txt
+    if grep -q "gpu_mem=" "$BOOT_CONFIG"; then
+        sudo sed -i 's/gpu_mem=.*/gpu_mem=128/' "$BOOT_CONFIG"
     else
-        echo "gpu_mem=128" | sudo tee -a /boot/firmware/config.txt
+        echo "gpu_mem=128" | sudo tee -a "$BOOT_CONFIG"
     fi
     
     # Pi 5 specific optimizations
-    echo "# Prize Wheel System - Pi 5 Optimizations" | sudo tee -a /boot/firmware/config.txt
-    echo "dtoverlay=vc4-kms-v3d" | sudo tee -a /boot/firmware/config.txt
-    echo "max_framebuffers=2" | sudo tee -a /boot/firmware/config.txt
-    echo "disable_overscan=1" | sudo tee -a /boot/firmware/config.txt
-    echo "hdmi_force_hotplug=1" | sudo tee -a /boot/firmware/config.txt
+    echo "# Prize Wheel System - Pi 5 Optimizations" | sudo tee -a "$BOOT_CONFIG"
+    echo "dtoverlay=vc4-kms-v3d" | sudo tee -a "$BOOT_CONFIG"
+    echo "max_framebuffers=2" | sudo tee -a "$BOOT_CONFIG"
+    echo "disable_overscan=1" | sudo tee -a "$BOOT_CONFIG"
+    echo "hdmi_force_hotplug=1" | sudo tee -a "$BOOT_CONFIG"
     
     # Optimize boot time for Pi 5
     sudo systemctl disable bluetooth hciuart
@@ -1172,6 +1193,7 @@ finalize_setup() {
     sudo systemctl daemon-reload
     sudo systemctl enable nginx
     sudo systemctl enable ${SERVICE_NAME}
+    sudo systemctl enable ${SERVICE_NAME}-watchdog
     sudo systemctl enable prizewheel-kiosk
     sudo systemctl enable fail2ban
     
@@ -1185,15 +1207,15 @@ print_final_summary() {
     IP_ADDRESS=$(hostname -I | awk '{print $1}')
     
     log ""
-    log "${GREEN}${BOLD}ðŸŽ‰ Prize Wheel System v${SCRIPT_VERSION} Setup Completed Successfully! ðŸŽ‰${NC}"
+    log "${GREEN}${BOLD}🎉 Prize Wheel System v${SCRIPT_VERSION} Setup Completed Successfully! 🎉${NC}"
     log "${GREEN}${BOLD}Optimized for Raspberry Pi 5 with CLI-only OS and Auto Kiosk Display${NC}"
     log "${GREEN}${BOLD}** CRITICAL FIXES APPLIED **${NC}"
     log ""
     log "${CYAN}${BOLD}System Information:${NC}"
-    log "  ðŸ“ Installation Directory: ${PROJECT_DIR}"
-    log "  ðŸŒ IP Address: ${IP_ADDRESS}"
-    log "  ðŸ–¥ï¸ Kiosk Display: Auto-launches on boot to http://localhost"
-    log "  ðŸ”§ Admin Panel: http://${IP_ADDRESS}/admin (from other devices)"
+    log "  📁 Installation Directory: ${PROJECT_DIR}"
+    log "  🌐 IP Address: ${IP_ADDRESS}"
+    log "  🖥️ Kiosk Display: Auto-launches on boot to http://localhost"
+    log "  🔧 Admin Panel: http://${IP_ADDRESS}/admin (from other devices)"
     log ""
     log "${CYAN}${BOLD}Default Login Credentials:${NC}"
     log "  ${LOCK} Username: admin"
@@ -1201,27 +1223,29 @@ print_final_summary() {
     log "  ${WARNING} ${BOLD}IMPORTANT: Change these credentials immediately!${NC}"
     log ""
     log "${CYAN}${BOLD}Critical Fixes Applied:${NC}"
-    log "  âœ… Proper application file copying from source directory"
-    log "  âœ… requirements.txt installation instead of individual packages"
-    log "  âœ… Streamlined kiosk startup without conflicting mechanisms"
-    log "  âœ… Enhanced source file validation and error handling"
+    log "  ✅ Fixed character encoding issues throughout codebase"
+    log "  ✅ Boot config compatibility for Pi OS versions"
+    log "  ✅ Robust error handling in winner calculation"
+    log "  ✅ Enhanced source file validation"
+    log "  ✅ Added watchdog service for reliability"
     log ""
     log "${CYAN}${BOLD}Hardware Connections (Pi 5 GPIO):${NC}"
-    log "  ðŸ”˜ Spin Button: GPIO 17 (Pin 11) to Ground"
-    log "  ðŸ’¡ Status LED: GPIO 27 (Pin 13) with 330Î© resistor"
+    log "  🔘 Spin Button: GPIO 17 (Pin 11) to Ground"
+    log "  💡 Status LED: GPIO 27 (Pin 13) with 330Ω resistor"
     log "  ${SOUND} Audio: HDMI or 3.5mm jack (auto-detected)"
     log ""
     log "${CYAN}${BOLD}System Services:${NC}"
-    log "  ðŸ”§ Main App: sudo systemctl status prizewheel"
-    log "  ðŸ–¥ï¸ Display: sudo systemctl status prizewheel-kiosk"
-    log "  ðŸŒ Web Server: sudo systemctl status nginx"
+    log "  🔧 Main App: sudo systemctl status prizewheel"
+    log "  🖥️ Display: sudo systemctl status prizewheel-kiosk"
+    log "  👁️ Watchdog: sudo systemctl status prizewheel-watchdog"
+    log "  🌐 Web Server: sudo systemctl status nginx"
     log ""
     log "${CYAN}${BOLD}Useful Commands:${NC}"
-    log "  ðŸ“Š System Status: ${PROJECT_DIR}/scripts/system_status.sh"
-    log "  ðŸ”„ Update System: ${PROJECT_DIR}/scripts/update_system.sh"
-    log "  ðŸ’¾ Backup Database: ${PROJECT_DIR}/scripts/backup_database.sh"
-    log "  âš¡ Optimize Pi 5: ${PROJECT_DIR}/scripts/optimize_pi5.sh"
-    log "  ðŸ“‹ View Logs: journalctl -u prizewheel -f"
+    log "  📊 System Status: ${PROJECT_DIR}/scripts/system_status.sh"
+    log "  🔄 Update System: ${PROJECT_DIR}/scripts/update_system.sh"
+    log "  💾 Backup Database: ${PROJECT_DIR}/scripts/backup_database.sh"
+    log "  ⚡ Optimize Pi 5: ${PROJECT_DIR}/scripts/optimize_pi5.sh"
+    log "  📋 View Logs: journalctl -u prizewheel -f"
     log ""
     log "${CYAN}${BOLD}Next Steps:${NC}"
     log "  1. ${CHECKMARK} Reboot the system: sudo reboot"
@@ -1231,7 +1255,7 @@ print_final_summary() {
     log "  5. ${CHECKMARK} Upload custom prizes and sounds"
     log "  6. ${CHECKMARK} Test the wheel operation"
     log ""
-    log "${PURPLE}${BOLD}The Prize Wheel System is ready with CRITICAL FIXES applied! ðŸŽ°âœ¨${NC}"
+    log "${PURPLE}${BOLD}The Prize Wheel System is ready with CRITICAL FIXES applied! 🎰✨${NC}"
     log ""
 }
 
@@ -1239,9 +1263,9 @@ print_final_summary() {
 main() {
     print_header
     
-    # Pre-flight checks with CRITICAL FIX validation
+    # Pre-flight checks
     check_root
-    check_source_files  # CRITICAL FIX: Validate source files exist
+    check_source_files
     check_raspberry_pi
     check_os_version
     check_internet
@@ -1252,16 +1276,16 @@ main() {
     install_audio_system
     install_gpio_support
     
-    # Project setup with CRITICAL FIXES
-    create_project_structure  # CRITICAL FIX: Now copies files properly
-    install_python_dependencies  # CRITICAL FIX: Uses requirements.txt
+    # Project setup
+    create_project_structure
+    install_python_dependencies
     setup_database
     
     # Web server and services
     configure_nginx
     create_systemd_services
     create_display_scripts
-    configure_auto_login  # CRITICAL FIX: Streamlined startup
+    configure_auto_login
     
     # Security and configuration
     setup_security

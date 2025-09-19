@@ -530,9 +530,7 @@
     </style>
 </head>
 <body>
-    <div class="fix-indicator">Server Winner Logic âœ“</div>
-
-    <div class="main-container">
+    <div class="fix-indicator">Server Winner Logic ✓</div> <div class="main-container">
         <div class="wheel-section">
             <div class="wheel-container hardware-accelerated">
                 <div class="pointer"></div>
@@ -552,8 +550,7 @@
     </div>
 
     <div class="volume-control" aria-label="Volume control">
-        <label for="volumeSlider">ðŸ”Š</label>
-        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="0.7" aria-label="Master volume">
+        <label for="volumeSlider">🔊</label> <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="0.7" aria-label="Master volume">
     </div>
 
     <div class="winner-modal" id="winnerModal" role="dialog" aria-modal="true" aria-labelledby="winnerTitle">
@@ -583,13 +580,14 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
         // CRITICAL FIXES APPLIED: Prize Wheel Display System v2.1
-        console.log('ðŸŽ¯ Prize Wheel Display System v2.1 - CRITICAL FIXES & IMPROVEMENTS APPLIED');
-        console.log('âœ… Server-side winner determination implemented');
-        console.log('âœ… Client-side cooldown now synchronized with server');
+        // ### FIX APPLIED ### - Corrected character encoding for all console logs and UI text
+        console.log('🎰 Prize Wheel Display System v2.1 - CRITICAL FIXES & IMPROVEMENTS APPLIED');
+        console.log('✅ Server-side winner determination implemented');
+        console.log('✅ Client-side cooldown now synchronized with server');
 
         // Prize data from server (Flask template injection)
         const prizes = {{ prizes | tojson }};
-        console.log('ðŸ“‹ Loaded prizes:', prizes.length);
+        console.log('📋 Loaded prizes:', prizes.length);
         
         // Enhanced audio management system
         const audioElements = {
@@ -641,7 +639,7 @@
                     prizeAudioCache.set(prize.id, audio);
                 }
             });
-            console.log('ðŸŽµ Preloaded prize sounds:', prizeAudioCache.size);
+            console.log('🔊 Preloaded prize sounds:', prizeAudioCache.size);
         }
 
         function playSound(type, prizeId = null) {
@@ -692,12 +690,12 @@
         });
 
         socket.on('connect', () => {
-            console.log('âœ… Connected to server with CRITICAL FIXES');
+            console.log('✅ Connected to server with CRITICAL FIXES');
             updateStatus('ready');
         });
 
         socket.on('disconnect', () => {
-            console.log('âŒ Disconnected from server');
+            console.log('❌ Disconnected from server');
         });
 
         socket.on('connect_error', (error) => {
@@ -838,7 +836,7 @@
             isSpinning = false;
             spinStartTime = null;
             stopSound('spin');
-            console.log('ðŸŽ¯ Spin complete - Server determined winner:', serverWinnerData?.name);
+            console.log('🎯 Spin complete - Server determined winner:', serverWinnerData?.name);
             if (serverWinnerData) {
                 if (serverWinnerData.is_winner) {
                     playSound('winner', serverWinnerData.id);
@@ -875,11 +873,11 @@
         function showWinner(winner) {
             const winnerTitleEl = document.getElementById('winnerTitle');
             if (winner.is_winner) {
-                winnerTitleEl.innerHTML = 'ðŸ† WINNER! ðŸ†';
+                winnerTitleEl.innerHTML = '🏆 WINNER! 🏆';
                 winnerTitleEl.className = 'winner-title winner';
                 createCelebrationEffects();
             } else {
-                winnerTitleEl.innerHTML = 'ðŸ˜¥ Oh No... ðŸ˜¥';
+                winnerTitleEl.innerHTML = '😟 Oh No... 😟';
                 winnerTitleEl.className = 'winner-title loser';
             }
             document.getElementById('winnerName').textContent = winner.name;
@@ -976,13 +974,13 @@
             switch(status) {
                 case 'ready':
                     indicator.classList.add('status-ready');
-                    text.textContent = 'âœ… Ready to Spin!';
+                    text.textContent = '✅ Ready to Spin!';
                     button.disabled = false;
                     buttonText.textContent = 'Spin Wheel';
                     break;
                 case 'spinning':
                     indicator.classList.add('status-spinning');
-                    text.textContent = 'ðŸŒ€ Spinning...';
+                    text.textContent = '🌀 Spinning...';
                     button.disabled = true;
                     buttonText.textContent = 'Spinning...';
                     break;
@@ -991,11 +989,11 @@
                     button.disabled = true;
                     buttonText.textContent = 'Please Wait...';
                     let countdown = Math.ceil(duration);
-                    text.textContent = `â³ Cooldown (${countdown}s)`;
+                    text.textContent = `⏳ Cooldown (${countdown}s)`;
                     countdownInterval = setInterval(() => {
                         countdown--;
                         if (countdown > 0) {
-                            text.textContent = `â³ Cooldown (${countdown}s)`;
+                            text.textContent = `⏳ Cooldown (${countdown}s)`;
                         } else {
                             clearInterval(countdownInterval);
                         }
@@ -1003,7 +1001,7 @@
                     break;
                 case 'error':
                     indicator.classList.add('status-cooldown');
-                    text.textContent = 'âŒ Error - Try Again';
+                    text.textContent = '❌ Error - Try Again';
                     button.disabled = false;
                     buttonText.textContent = 'Try Again';
                     break;
@@ -1011,7 +1009,7 @@
         }
 
         socket.on('spin_started', (data) => {
-            console.log('ðŸŽ¯ CRITICAL FIX: Server spin started with comprehensive data:', data);
+            console.log('🎯 CRITICAL FIX: Server spin started with comprehensive data:', data);
             if (isSpinning) return;
             isSpinning = true;
             updateStatus('spinning');
@@ -1023,7 +1021,7 @@
             } else {
                 serverWinnerData = prizes[serverWinnerIndex] || prizes[0];
             }
-            console.log('ðŸŽ¯ Server determined winner:', serverWinnerData?.name, 'at index:', serverWinnerIndex);
+            console.log('🎯 Server determined winner:', serverWinnerData?.name, 'at index:', serverWinnerIndex);
             const numPrizes = prizes.length;
             const anglePerPrize = (Math.PI * 2) / numPrizes;
             const winnerAngle = serverWinnerIndex * anglePerPrize + anglePerPrize / 2;
@@ -1036,7 +1034,7 @@
 
         // IMPROVEMENT: Use cooldown duration from server
         socket.on('spin_complete', (data) => {
-            console.log('ðŸ† Server spin complete:', data);
+            console.log('🏁 Server spin complete:', data);
             const cooldown = data.cooldown_duration || 3000;
             updateStatus('cooldown', cooldown / 1000);
             
@@ -1045,7 +1043,7 @@
             }, cooldown);
 
             if (data.winner && serverWinnerData && data.winner.id !== serverWinnerData.id) {
-                console.warn('âš ï¸ Winner mismatch detected - using server winner');
+                console.warn('⚠️ Winner mismatch detected - using server winner');
                 serverWinnerData = data.winner;
             }
         });
@@ -1084,13 +1082,13 @@
         });
 
         function init() {
-            console.log('ðŸš€ Initializing Prize Wheel Display System v2.1 with CRITICAL FIXES...');
+            console.log('🚀 Initializing Prize Wheel Display System v2.1 with CRITICAL FIXES...');
             setCanvasSize();
             drawWheel();
             preloadPrizeSounds();
             updateAudioVolumes();
             updateStatus('ready');
-            console.log('ðŸŽ° Prize Wheel Display System v2.1 initialized successfully!');
+            console.log('🎉 Prize Wheel Display System v2.1 initialized successfully!');
         }
 
         let resizeTimer;
