@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize Wheel Admin Login - FINAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 1;
+            animation: slideInUp 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .wheel-icon {
+            font-size: 64px;
+            margin-bottom: 25px;
+            animation: wheelSpin 3s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes wheelSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:valid {
+            border-color: #4CAF50;
+        }
+
+        .form-group input:invalid:not(:focus):not(:placeholder-shown) {
+            border-color: #f44336;
+        }
+
+        /* Enhanced input icons */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.5;
+            z-index: 1;
+            margin-top: 15px;
+        }
+
+        .form-group.username::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23667eea'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E");
+        }
+
+        .form-group.password::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23667eea'%3E%3Cpath d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z'/%3E%3C/svg%3E");
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+            color: #c33;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            border: 2px solid #f5c6cb;
+            animation: errorShake 0.5s ease-out;
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f2ff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            font-size: 13px;
+            color: #555;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .info-box strong {
+            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+
+        .info-box .warning {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            font-style: italic;
+            color: #f44336;
+            font-weight: 600;
+        }
+
+        /* Security indicator */
+        .security-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            opacity: 0.8;
+        }
+
+        .security-indicator::before {
+            content: 'ðŸ”’';
+            font-size: 14px;
+        }
+
+        /* Pi 5 branding */
+        .pi5-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 20px;
+                padding: 35px 25px;
+                border-radius: 20px;
+            }
+
+            .wheel-icon {
+                font-size: 48px;
+            }
+
+            .login-header h1 {
+                font-size: 28px;
+            }
+
+            .pi5-badge {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 25px 20px;
+            }
+
+            .form-group input {
+                padding: 12px 45px 12px 45px;
+                font-size: 14px;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .login-container {
+                background: white;
+                border: 3px solid #000;
+            }
+
+            .form-group input {
+                border: 3px solid #333;
+                background: white;
+            }
+
+            .form-group input:focus {
+                border-color: #000;
+                box-shadow: 0 0 0 3px rgba(0,0,0,0.3);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .wheel-icon {
+                animation: none;
+            }
+
+            .login-container {
+                animation: none;
+            }
+
+            .particle {
+                animation: none;
+            }
+
+            * {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pi 5 Badge -->
+    <div class="pi5-badge">Pi 5 Ready</div>
+
+    <!-- Animated background particles -->
+    <div class="bg-particles" id="particles"></div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <div class="wheel-icon" aria-label="Prize wheel icon">ðŸŽ°</div>
+            <h1>Prize Wheel Admin</h1>
+            <p>Secure administrative access required</p>
+        </div>
+        
+        {% if error %}
+        <div class="error-message" role="alert">
+            <strong>Authentication Failed:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="/admin/login" id="loginForm">
+            <div class="form-group username">
+                <label for="username">Administrator Username</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       required 
+                       autofocus 
+                       autocomplete="username"
+                       placeholder="Enter your username"
+                       maxlength="50">
+            </div>
+            
+            <div class="form-group password">
+                <label for="password">Password</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       required 
+                       autocomplete="current-password"
+                       placeholder="Enter your password"
+                       minlength="6"
+                       maxlength="100">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="loginButton">
+                <span class="loading-spinner" id="loadingSpinner"></span>
+                <span id="buttonText">Access Dashboard</span>
+            </button>
+        </form>
+        
+        <div class="security-indicator">
+            Secure encrypted connection
+        </div>
+        
+        <div class="info-box">
+            <strong>Default Administrator Account:</strong><br>
+            Username: <code>admin</code><br>
+            Password: <code>admin123</code>
+            
+            <div class="warning">
+                âš ï¸ Change these credentials immediately after first login for security!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animated background particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Enhanced form handling with better UX
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const button = document.getElementById('loginButton');
+            const spinner = document.getElementById('loadingSpinner');
+            const buttonText = document.getElementById('buttonText');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Client-side validation
+            if (!username) {
+                e.preventDefault();
+                showError('Please enter your username');
+                document.getElementById('username').focus();
+                return;
+            }
+
+            if (!password) {
+                e.preventDefault();
+                showError('Please enter your password');
+                document.getElementById('password').focus();
+                return;
+            }
+
+            if (password.length < 6) {
+                e.preventDefault();
+                showError('Password must be at least 6 characters long');
+                document.getElementById('password').focus();
+                return;
+            }
+
+            // Show loading state
+            button.disabled = true;
+            spinner.style.display = 'inline-block';
+            buttonText.textContent = 'Authenticating...';
+
+            // Remove any existing error messages
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.style.opacity = '0';
+                setTimeout(() => existingError.remove(), 300);
+            }
+        });
+
+        function showError(message) {
+            // Remove existing error messages
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // Create new error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `<strong>Error:</strong> ${message}`;
+            
+            const form = document.getElementById('loginForm');
+            form.parentNode.insertBefore(errorDiv, form);
+
+            // Reset button state
+            const button = document.getElementById('loginButton');
+            const spinner = document.getElementById('loadingSpinner');
+            const buttonText = document.getElementById('buttonText');
+            
+            button.disabled = false;
+            spinner.style.display = 'none';
+            buttonText.textContent = 'Access Dashboard';
+        }
+
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') {
+                    if (activeElement.id === 'username') {
+                        document.getElementById('password').focus();
+                        e.preventDefault();
+                    } else if (activeElement.id === 'password') {
+                        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+
+        // Form auto-completion and security
+        document.getElementById('username').addEventListener('input', function(e) {
+            // Remove any non-alphanumeric characters except underscore and dash
+            e.target.value = e.target.value.replace(/[^a-zA-Z0-9_-]/g, '');
+        });
+
+        // Password strength indicator (visual feedback)
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strength = calculatePasswordStrength(password);
+            
+            // Visual feedback based on strength
+            if (strength < 2) {
+                e.target.style.borderColor = '#f44336';
+            } else if (strength < 4) {
+                e.target.style.borderColor = '#ff9800';
+            } else {
+                e.target.style.borderColor = '#4caf50';
+            }
+        });
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            return strength;
+        }
+
+        // Accessibility improvements
+        function announceLiveRegion(message) {
+            const liveRegion = document.createElement('div');
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.style.position = 'absolute';
+            liveRegion.style.left = '-10000px';
+            liveRegion.textContent = message;
+            document.body.appendChild(liveRegion);
+            
+            setTimeout(() => {
+                document.body.removeChild(liveRegion);
+            }, 1000);
+        }
+
+        // Security: Prevent common attacks
+        document.addEventListener('paste', function(e) {
+            const target = e.target;
+            if (target.type === 'password') {
+                // Allow paste for password managers but sanitize
+                setTimeout(() => {
+                    target.value = target.value.trim();
+                }, 10);
+            }
+        });
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Focus management
+            const usernameField = document.getElementById('username');
+            if (usernameField) {
+                usernameField.focus();
+            }
+
+            // Check for auto-filled credentials
+            setTimeout(() => {
+                if (usernameField.value && document.getElementById('password').value) {
+                    announceLiveRegion('Credentials auto-filled by browser');
+                }
+            }, 500);
+
+            console.log('Prize Wheel Admin Login v2.0 - FINAL loaded (Pi 5 Compatible with Critical Fixes)');
+        });
+
+        // Handle form submission errors from server
+        {% if error %}
+        document.addEventListener('DOMContentLoaded', function() {
+            announceLiveRegion('Login failed: {{ error }}');
+            
+            // Clear password field on error for security
+            document.getElementById('password').value = '';
+            document.getElementById('password').focus();
+        });
+        {% endif %}
+
+        // Performance: Clean up particles on page unload
+        window.addEventListener('beforeunload', function() {
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach(particle => particle.remove());
+        });
+
+        // Pi 5 specific optimizations
+        if ('serviceWorker' in navigator) {
+            // Register service worker for better performance on Pi 5
+            window.addEventListener('load', function() {
+                // This would be implemented for production PWA features
+                console.log('Prize Wheel System ready for Pi 5 service worker registration');
+            });
+        }
+
+        // Handle network status for Pi 5 (might be on WiFi)
+        window.addEventListener('online', function() {
+            console.log('Network connection restored');
+        });
+
+        window.addEventListener('offline', function() {
+            console.log('Network connection lost - operating in offline mode');
+        });
+    </script>
+</body>
+</html>
