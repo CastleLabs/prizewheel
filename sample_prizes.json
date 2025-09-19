@@ -1,1 +1,117 @@
 
+{
+  "sample_prizes": [
+    {
+      "name": "$50 Castle Card",
+      "description": "Great Spin!",
+      "weight": 0.01,
+      "color": "#FFD700",
+      "is_winner": true
+    },
+    {
+      "name": "Gutter ball",
+      "description": "Sorry, You did not win.",
+      "weight": 30.0,
+      "color": "#9E9E9E",
+      "is_winner": false
+    },
+    {
+      "name": "$25 Castle Card",
+      "description": "Nice Spin!",
+      "weight": 0.05,
+      "color": "#E91E63",
+      "is_winner": true
+    },
+    {
+      "name": "Ride on Go-Karts",
+      "description": "Vroom vroom!",
+      "weight": 5.0,
+      "color": "#F44336",
+      "is_winner": true
+    },
+    {
+      "name": "Castle T-Shirt",
+      "description": "Wear it with pride!",
+      "weight": 2.0,
+      "color": "#00BCD4",
+      "is_winner": true
+    },
+    {
+      "name": "Mystery Gift",
+      "description": "What could it be?",
+      "weight": 3.0,
+      "color": "#9C27B0",
+      "is_winner": true
+    },
+    {
+      "name": "Womp Womp",
+      "description": "Better luck next time!",
+      "weight": 25.0,
+      "color": "#FF9800",
+      "is_winner": false
+    },
+    {
+      "name": "Try Again",
+      "description": "Spin one more time!",
+      "weight": 25.0,
+      "color": "#795548",
+      "is_winner": false
+    },
+    {
+      "name": "Free Pretzel",
+      "description": "Yummy and salty!",
+      "weight": 20.0,
+      "color": "#FFEB3B",
+      "is_winner": true
+    },
+    {
+      "name": "Mini Golf Pass",
+      "description": "Time for a hole-in-one!",
+      "weight": 4.0,
+      "color": "#4CAF50",
+      "is_winner": true
+    },
+    {
+      "name": "Zip Line Ride",
+      "description": "Zip into fun!",
+      "weight": 6.0,
+      "color": "#2196F3",
+      "is_winner": true
+    },
+    {
+      "name": "100 Tickets",
+      "description": "A good start to a prize!",
+      "weight": 8.0,
+      "color": "#8BC34A",
+      "is_winner": true
+    },
+    {
+      "name": "Small Slushie",
+      "description": "A tasty, cool treat!",
+      "weight": 18.0,
+      "color": "#FF5722",
+      "is_winner": true
+    },
+    {
+      "name": "Laser Tag Game",
+      "description": "Get your game on!",
+      "weight": 2.0,
+      "color": "#673AB7",
+      "is_winner": true
+    },
+    {
+      "name": "Bankrupt",
+      "description": "Oh no, you lose!",
+      "weight": 15.0,
+      "color": "#212121",
+      "is_winner": false
+    },
+    {
+      "name": "Jackpot!",
+      "description": "You won the grand prize!",
+      "weight": 0.001,
+      "color": "#44ffc8",
+      "is_winner": true
+    }
+  ]
+}
