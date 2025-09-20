@@ -14,11 +14,11 @@ SQLAlchemy==2.0.23
 # Real-time Communication
 Flask-SocketIO==5.3.6
 python-socketio==5.10.0
-python-engineio==4.7.1
+python-engineio==4.8.0
 
 # Security and Authentication
 itsdangerous==2.1.2
-cryptography==41.0.8
+cryptography==42.0.8
 
 # Environment and Configuration
 python-dotenv==1.0.0
@@ -91,7 +91,7 @@ lgpio==0.2.2.0
 numpy==1.24.3
 
 # Version Information
-__version__ = "2.0.0-FINAL-PI5"
+#__version__ = "2.0.0-FINAL-PI5"
 
 # Build Information
 # Target Platform: Raspberry Pi 5 (ARM64)

@@ -317,7 +317,6 @@ install_audio_system() {
         sox \
         libsox-fmt-all \
         ffmpeg \
-        vlc-nox \
         python3-pyaudio \
         portaudio19-dev \
         libasound2-dev
