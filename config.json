@@ -1,0 +1,37 @@
+{
+  "spin_duration_seconds": 8,
+  "cooldown_seconds": 3,
+  "volume": 75,
+  "button_pin": 17,
+  "system_sounds": {
+    "spin": "/static/sounds/spin.mp3",
+    "winner": "/static/sounds/victory.mp3",
+    "loser": "/static/sounds/try-again.mp3"
+  },
+  "modal_delay_ms": 4500,
+  "modal_auto_close_ms": 6000,
+  "winner_flash_duration_ms": 4000,
+  "display_settings": {
+    "enable_confetti": true,
+    "show_instructions": false,
+    "show_stats": true,
+    "animation_speed": "normal"
+  },
+  "event_settings": {
+    "max_concurrent_users": 50,
+    "session_timeout_minutes": 30,
+    "auto_backup_interval_minutes": 15
+  },
+  "audio_settings": {
+    "enable_sound_effects": true,
+    "master_volume": 75,
+    "fade_in_duration": 0.5,
+    "fade_out_duration": 0.3
+  },
+  "error_handling": {
+    "max_retry_attempts": 3,
+    "retry_delay_seconds": 2,
+    "fallback_mode_enabled": true,
+    "log_level": "INFO"
+  }
+}

@@ -1,0 +1,162 @@
+[
+  {
+    "name": "GRAND PRIZE",
+    "description": "A grand prize from the royal treasury!",
+    "weight": 0.1,
+    "color": "#00f531",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "1"
+  },
+  {
+    "name": "Try Again",
+    "description": "The quest continues! Fortune awaits your next spin.",
+    "weight": 15.0,
+    "color": "#607d8b",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail4.mp3",
+    "enabled": true,
+    "id": "2"
+  },
+  {
+    "name": "$25 Castle Card",
+    "description": "A handsome reward for a valiant spin!",
+    "weight": 10.0,
+    "color": "#e91e63",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "3"
+  },
+  {
+    "name": "Gutter ball",
+    "description": "Sorry, you did not win this time.",
+    "weight": 5.0,
+    "color": "#9e9e9e",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "enabled": true,
+    "id": "4"
+  },
+  {
+    "name": "Ride on Go-Karts",
+    "description": "Vroom vroom! A pass for a thrilling race!",
+    "weight": 10.0,
+    "color": "#f44336",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "5"
+  },
+  {
+    "name": "So Close!",
+    "description": "You almost had it! Give it another try.",
+    "weight": 5.0,
+    "color": "#795548",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "enabled": true,
+    "id": "6"
+  },
+  {
+    "name": "Mini Golf Pass",
+    "description": "A pass for a legendary game of mini golf!",
+    "weight": 10.0,
+    "color": "#4caf50",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "7"
+  },
+  {
+    "name": "Not a winner",
+    "description": "Don't give up! The wheel may favor you yet.",
+    "weight": 5.0,
+    "color": "#bdbdbd",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "enabled": true,
+    "id": "8"
+  },
+  {
+    "name": "Free Laser Tag",
+    "description": "Enter the arena and claim victory!",
+    "weight": 10.0,
+    "color": "#9c27b0",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "9"
+  },
+  {
+    "name": "Not This Time",
+    "description": "The wheel's magic eluded you this spin.",
+    "weight": 5.0,
+    "color": "#424242",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail4.mp3",
+    "enabled": true,
+    "id": "10"
+  },
+  {
+    "name": "$10 Arcade Card",
+    "description": "Time to set a new high score!",
+    "weight": 10.0,
+    "color": "#00BCD4",
+    "is_winner": true,
+    "sound_path": "",
+    "enabled": true,
+    "id": "11"
+  },
+  {
+    "name": "A Valiant Effort",
+    "description": "A good spin, but no prize today.",
+    "weight": 5.0,
+    "color": "#a1887f",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "enabled": true,
+    "id": "12"
+  },
+  {
+    "name": "Free Popcorn",
+    "description": "A delicious treat from the castle kitchens!",
+    "weight": 10.0,
+    "color": "#ffeb3b",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "13"
+  },
+  {
+    "name": "Womp Womp",
+    "description": "Better luck next time!",
+    "weight": 5.0,
+    "color": "#c2185b",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "enabled": true,
+    "id": "14"
+  },
+  {
+    "name": "Small Slushie",
+    "description": "A frosty potion to quench your thirst!",
+    "weight": 10.0,
+    "color": "#03a9f4",
+    "is_winner": true,
+    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "enabled": true,
+    "id": "15"
+  },
+  {
+    "name": "So Close!",
+    "description": "The pointer was almost there!",
+    "weight": 5.0,
+    "color": "#616161",
+    "is_winner": false,
+    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "enabled": true,
+    "id": "16"
+  }
+]

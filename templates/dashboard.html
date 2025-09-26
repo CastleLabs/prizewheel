@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize Wheel Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-1: #ffd700; --gold-2: #ffb300; --royal-purple: #6B46C1;
+            --danger: #dc3545; --success: #28a745; --warning: #ffc107; --info: #0dcaf0;
+            --dark-bg: #0a0a0f; --card-bg: rgba(42,26,78,0.3); --card-bg-solid: #1a1a2e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a0033 35%, #000622 100%);
+            color: #fff; font-family: 'Montserrat', sans-serif; min-height: 100vh; padding: 20px;
+        }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; }
+        .header { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px solid var(--gold-2); text-align: center; }
+        .header h1 { font-family: 'Cinzel', serif; font-size: 32px; color: var(--gold-1); }
+        .nav-links { margin-top: 15px; }
+        .nav-links a { color: var(--gold-2); text-decoration: none; margin: 0 10px; padding: 8px 16px; border: 1px solid rgba(255,179,0,0.3); border-radius: 5px; transition: all 0.3s ease; }
+        .nav-links a:hover { background: rgba(255,179,0,0.1); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,215,0,0.3); text-align: center; }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--gold-1); margin-bottom: 5px; }
+        .stat-label { font-size: 13px; color: rgba(255,255,255,0.7); text-transform: uppercase; }
+
+        .main-content { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        
+        .section { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,215,0,0.3); }
+        .section-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold-1); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,215,0,0.3); }
+
+        .tabs { display: flex; border-bottom: 2px solid rgba(255,215,0,0.3); margin-bottom: 20px; }
+        .tab-link { padding: 10px 20px; cursor: pointer; font-weight: 600; color: rgba(255,255,255,0.6); transition: all 0.3s ease; }
+        .tab-link.active { color: var(--gold-1); border-bottom: 2px solid var(--gold-1); transform: translateY(2px); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin: 5px; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
+        .btn-primary { background: var(--royal-purple); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: black; }
+        .btn-info { background: var(--info); color: black; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .prizes-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .prizes-table th, .prizes-table td { padding: 12px; text-align: left; vertical-align: middle; }
+        .prizes-table th { color: var(--gold-2); }
+        .prizes-table tr { background: rgba(0,0,0,0.3); transition: background 0.3s ease; }
+        .prizes-table tr:hover { background: rgba(255,215,0,0.1); }
+        .prize-color { width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 10px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; }
+        
+        .history-list { max-height: 400px; overflow-y: auto; }
+        .history-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-card { background: var(--card-bg-solid); border: 2px solid var(--gold-1); border-radius: 15px; padding: 30px; width: 90%; max-width: 600px; position: relative; }
+        .modal-title { font-family: 'Cinzel', serif; font-size: 24px; color: var(--gold-1); margin-bottom: 20px; }
+        .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 5px; font-weight: 600; font-size: 13px; color: rgba(255,255,255,0.8); }
+        .form-group input, .form-group select, .form-group textarea { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); color: white; padding: 10px; border-radius: 5px; font-family: 'Montserrat', sans-serif; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group.toggle-group { flex-direction: row; align-items: center; }
+        .form-group.toggle-group label { margin: 0 10px 0 0; }
+        .form-group small { font-size: 11px; opacity: 0.7; margin-top: 5px; }
+        
+        /* Timing Configuration Section */
+        .timing-section { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 10px; padding: 20px; margin: 20px 0; }
+        .timing-title { font-family: 'Cinzel', serif; color: var(--gold-1); font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Notification Styles */
+        .notification { position: fixed; top: 20px; right: 20px; z-index: 2000; padding: 15px 20px; border-radius: 8px; font-weight: 600; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="header">
+            <h1>🏰 Prize Wheel Dashboard</h1>
+            <div class="nav-links">
+                <a href="/">🎡 Display Page</a>
+                <a href="/dashboard">📊 Dashboard</a>
+                <a href="/odds">🎯 Odds Calculator</a>
+            </div>
+        </header>
+        
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="statTotalSpins">-</div><div class="stat-label">Total Spins</div></div>
+            <div class="stat-card"><div class="stat-value" id="statWinRate">-</div><div class="stat-label">Win Rate</div></div>
+            <div class="stat-card"><div class="stat-value" id="statActivePrizes">-</div><div class="stat-label">Active Prizes</div></div>
+            <div class="stat-card"><div class="stat-value" id="statConnectedClients">-</div><div class="stat-label">Connected Users</div></div>
+        </div>
+        
+        <div class="main-content">
+            <div class="section">
+                <div class="tabs">
+                    <div class="tab-link active" onclick="openTab(event, 'prizes')">🎁 Prizes</div>
+                    <div class="tab-link" onclick="openTab(event, 'settings')">⚙️ Settings</div>
+                    <div class="tab-link" onclick="openTab(event, 'sounds')">🎵 Sounds</div>
+                    <div class="tab-link" onclick="openTab(event, 'system')">🛠️ System</div>
+                </div>
+
+                <div id="prizes" class="tab-content active">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 class="section-title" style="margin: 0; border: none; padding: 0;">Prize Management</h2>
+                        <button class="btn btn-success" onclick="openPrizeModal()">+ Create New Prize</button>
+                    </div>
+                    <div id="prizesContainer" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+
+                <div id="settings" class="tab-content">
+                    <h2 class="section-title">Configuration Settings</h2>
+                    <form id="configForm" onsubmit="saveConfig(event)"></form>
+                </div>
+
+                <div id="sounds" class="tab-content">
+                    <h2 class="section-title">Sound Management</h2>
+                    <div id="soundsContainer"></div>
+                </div>
+                
+                <div id="system" class="tab-content">
+                    <h2 class="section-title">System Actions</h2>
+                    <div id="systemContainer"></div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">📜 Recent Activity</h2>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="prizeModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closePrizeModal()">×</button>
+            <h3 class="modal-title" id="prizeModalTitle">Edit Prize</h3>
+            <form id="prizeForm" onsubmit="savePrize(event)">
+                <input type="hidden" id="prizeId">
+                <div class="form-group">
+                    <label for="prizeName">Prize Name</label>
+                    <input type="text" id="prizeName" required>
+                </div>
+                <div class="form-group">
+                    <label for="prizeDescription">Description</label>
+                    <textarea id="prizeDescription"></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="prizeWeight">Weight</label>
+                        <input type="number" id="prizeWeight" required min="0.1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="prizeColor">Color</label>
+                        <input type="color" id="prizeColor" value="#FFD700" style="padding: 5px; height: 40px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="prizeSound">Sound Effect</label>
+                    <select id="prizeSound"></select>
+                </div>
+                <div class="form-grid" style="margin: 20px 0;">
+                    <div class="form-group toggle-group">
+                        <label for="prizeIsWinner">Is a winning prize?</label>
+                        <input type="checkbox" id="prizeIsWinner">
+                    </div>
+                    <div class="form-group toggle-group">
+                        <label for="prizeEnabled">Is prize enabled?</label>
+                        <input type="checkbox" id="prizeEnabled">
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-success">Save Prize</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+    let socket;
+    
+    // --- UTILITY FUNCTIONS ---
+    const escapeHtml = (str) => !str ? '' : str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);
+    const showNotification = (message, type = 'success') => {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+        notif.style.color = 'white';
+        notif.textContent = message;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4000);
+    };
+
+    // --- TAB HANDLING ---
+    const openTab = (evt, tabName) => {
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    };
+
+    // --- DATA FETCH & RENDER ---
+    async function loadDashboardData() {
+        try {
+            const response = await fetch('/api/dashboard_data');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            updateStats(data.stats);
+            renderPrizes(data.prizes);
+            renderHistory(data.recent_spins);
+            renderConfig(data.config);
+            renderSounds(data.prizes);
+            renderSystem();
+
+        } catch (error) {
+            showNotification('Failed to load dashboard data: ' + error.message, 'error');
+        }
+    }
+
+    const updateStats = (stats) => {
+        document.getElementById('statTotalSpins').textContent = stats.total_spins || 0;
+        document.getElementById('statWinRate').textContent = `${stats.win_rate || 0}%`;
+        document.getElementById('statActivePrizes').textContent = stats.active_prizes || 0;
+        document.getElementById('statConnectedClients').textContent = stats.connected_clients || 0;
+    };
+
+    const renderPrizes = (prizes) => {
+        const container = document.getElementById('prizesContainer');
+        if (!prizes || prizes.length === 0) {
+            container.innerHTML = '<p>No prizes configured.</p>';
+            return;
+        }
+        container.innerHTML = `<table class="prizes-table">
+            <thead><tr><th>Prize</th><th>Weight</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${prizes.map(p => `
+                <tr data-prize-id="${p.id}">
+                    <td><span class="prize-color" style="background-color:${p.color}"></span><strong>${escapeHtml(p.name)}</strong></td>
+                    <td>${p.weight}</td>
+                    <td>${p.is_winner ? '🏆 Winner' : '🎯 Try Again'}</td>
+                    <td>${p.enabled ? '✅ Enabled' : '⌘ Disabled'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openPrizeModal('${p.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePrize('${p.id}', '${escapeHtml(p.name)}')">Delete</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody></table>`;
+    };
+
+    const renderHistory = (history) => {
+        const container = document.getElementById('historyList');
+        if (!history || history.length === 0) {
+            container.innerHTML = '<p style="text-align:center;">No activity yet.</p>';
+            return;
+        }
+        container.innerHTML = history.map(item => `<div class="history-item">
+            <strong>${escapeHtml(item.prize_name)}</strong>
+            <div style="font-size:12px;opacity:0.7;">${new Date(item.timestamp).toLocaleString()}</div>
+            </div>`).join('');
+    };
+    
+    const renderConfig = (config) => {
+        document.getElementById('configForm').innerHTML = `
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="spinDuration">Spin Duration (seconds)</label>
+                    <input type="number" id="spinDuration" value="${config.spin_duration_seconds || 8}" step="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="cooldown">Cooldown (seconds)</label>
+                    <input type="number" id="cooldown" value="${config.cooldown_seconds || 3}" step="1" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="volume">Master Volume (${config.volume || 75}%)</label>
+                    <input type="range" id="volume" value="${config.volume || 75}" min="0" max="100" oninput="this.previousElementSibling.textContent = 'Master Volume ('+this.value+'%)'">
+                </div>
+                 <div class="form-group">
+                    <label for="button_pin">GPIO Button Pin</label>
+                    <input type="number" id="button_pin" value="${config.button_pin || 17}" min="1">
+                </div>
+            </div>
+            
+            <div class="timing-section">
+                <h4 class="timing-title">🎭 Modal Timing Settings</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="modalDelay">Modal Delay (milliseconds)</label>
+                        <input type="number" id="modalDelay" value="${config.modal_delay_ms || 3000}" step="100" min="500" max="10000">
+                        <small>Time before winner modal appears (allows sound to play)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalAutoClose">Modal Auto-Close (milliseconds)</label>
+                        <input type="number" id="modalAutoClose" value="${config.modal_auto_close_ms || 10000}" step="500" min="2000" max="30000">
+                        <small>How long modal stays open before auto-closing</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="winnerFlash">Winner Flash Duration (milliseconds)</label>
+                        <input type="number" id="winnerFlash" value="${config.winner_flash_duration_ms || 4000}" step="100" min="1000" max="10000">
+                        <small>How long the winning segment flashes</small>
+                    </div>
+                </div>
+                <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <strong>💡 Pro Tip:</strong> Longer modal delay = More time for dramatic audio buildup. Match timing to your sound file lengths for perfect synchronization!
+                </div>
+            </div>
+            
+            <div style="text-align: right; margin-top: 30px;">
+                <button type="submit" class="btn btn-success">Save Settings</button>
+            </div>`;
+    };
+    
+    const renderSounds = async (prizes) => {
+        const soundResponse = await fetch('/api/sounds/list');
+        const soundData = await soundResponse.json();
+        const sounds = soundData.sounds || [];
+
+        const prizeSoundSelect = document.getElementById('prizeSound');
+        if (prizeSoundSelect) {
+            prizeSoundSelect.innerHTML = '<option value="">- None -</option>' + sounds.map(s => `<option value="${s}">${s.split('/').pop()}</option>`).join('');
+        }
+
+        const container = document.getElementById('soundsContainer');
+        container.innerHTML = `
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Upload New Sound</label>
+                <input type="file" id="soundUpload" accept=".mp3,.wav,.ogg">
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="uploadSound()">Upload</button>
+            </div>
+            <h4>Available Sounds</h4>
+            <ul style="list-style: none; max-height: 300px; overflow-y: auto;">
+                ${sounds.map(s => `
+                    <li style="display: flex; align-items: center; padding: 5px; background: rgba(0,0,0,0.2); margin-bottom: 5px; border-radius: 5px;">
+                        <button class="btn-sm btn-info" style="margin-right: 10px;" onclick="new Audio('${s}').play()">▶</button>
+                        <span>${s.split('/').pop()}</span>
+                    </li>
+                `).join('') || '<li>No sounds found.</li>'}
+            </ul>`;
+    };
+    
+    const renderSystem = () => {
+        document.getElementById('systemContainer').innerHTML = `
+            <div class="form-group">
+                <label>Clear Spin History</label>
+                <p style="opacity: 0.7; font-size: 14px; margin-bottom: 10px;">This will permanently delete all spin records. This action cannot be undone.</p>
+                <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
+            </div>`;
+    };
+
+    // --- MODAL HANDLING ---
+    let allPrizes = [];
+    async function openPrizeModal(prizeId = null) {
+        const modal = document.getElementById('prizeModal');
+        const form = document.getElementById('prizeForm');
+        form.reset();
+
+        const prizeResponse = await fetch('/api/prizes');
+        const prizeData = await prizeResponse.json();
+        allPrizes = prizeData.prizes;
+
+        if (prizeId) {
+            const prize = allPrizes.find(p => p.id === prizeId);
+            if (!prize) return showNotification('Prize not found!', 'error');
+            document.getElementById('prizeModalTitle').textContent = 'Edit Prize';
+            document.getElementById('prizeId').value = prize.id;
+            document.getElementById('prizeName').value = prize.name;
+            document.getElementById('prizeDescription').value = prize.description;
+            document.getElementById('prizeWeight').value = prize.weight;
+            document.getElementById('prizeColor').value = prize.color;
+            document.getElementById('prizeSound').value = prize.sound_path || '';
+            document.getElementById('prizeIsWinner').checked = prize.is_winner;
+            document.getElementById('prizeEnabled').checked = prize.enabled;
+        } else {
+            document.getElementById('prizeModalTitle').textContent = 'Create New Prize';
+            document.getElementById('prizeId').value = '';
+            document.getElementById('prizeEnabled').checked = true;
+            document.getElementById('prizeIsWinner').checked = true;
+        }
+        modal.style.display = 'flex';
+    }
+    const closePrizeModal = () => document.getElementById('prizeModal').style.display = 'none';
+    
+    // --- API ACTIONS ---
+    async function savePrize(event) {
+        event.preventDefault();
+        const prizeId = document.getElementById('prizeId').value;
+        const prize = {
+            name: document.getElementById('prizeName').value,
+            description: document.getElementById('prizeDescription').value,
+            weight: parseFloat(document.getElementById('prizeWeight').value),
+            color: document.getElementById('prizeColor').value,
+            sound_path: document.getElementById('prizeSound').value,
+            is_winner: document.getElementById('prizeIsWinner').checked,
+            enabled: document.getElementById('prizeEnabled').checked,
+        };
+
+        const url = prizeId ? `/api/prizes/${prizeId}` : '/api/prizes';
+        const method = prizeId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(prize)
+        });
+
+        if (response.ok) {
+            showNotification(`Prize ${prizeId ? 'updated' : 'created'} successfully!`);
+            closePrizeModal();
+            loadDashboardData();
+        } else {
+            const error = await response.json();
+            showNotification(`Error: ${error.error}`, 'error');
+        }
+    }
+
+    async function deletePrize(prizeId, prizeName) {
+        if (!confirm(`Are you sure you want to delete "${prizeName}"?`)) return;
+        
+        const response = await fetch(`/api/prizes/${prizeId}`, { method: 'DELETE' });
+        if (response.ok) {
+            showNotification('Prize deleted successfully!');
+            loadDashboardData();
+        } else {
+            showNotification('Failed to delete prize.', 'error');
+        }
+    }
+
+    async function saveConfig(event) {
+        event.preventDefault();
+        const config = {
+            spin_duration_seconds: parseInt(document.getElementById('spinDuration').value),
+            cooldown_seconds: parseInt(document.getElementById('cooldown').value),
+            volume: parseInt(document.getElementById('volume').value),
+            button_pin: parseInt(document.getElementById('button_pin').value),
+            modal_delay_ms: parseInt(document.getElementById('modalDelay').value),
+            modal_auto_close_ms: parseInt(document.getElementById('modalAutoClose').value),
+            winner_flash_duration_ms: parseInt(document.getElementById('winnerFlash').value)
+        };
+        
+        const response = await fetch('/api/config', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(config)
+        });
+        if (response.ok) {
+            showNotification('Settings saved successfully! Reload the display page to see timing changes.');
+        } else {
+            showNotification('Failed to save settings.', 'error');
+        }
+    }
+
+    async function uploadSound() {
+        const fileInput = document.getElementById('soundUpload');
+        if (fileInput.files.length === 0) return showNotification('Please select a file to upload.', 'error');
+        
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        const response = await fetch('/api/upload/sound', { method: 'POST', body: formData });
+        if (response.ok) {
+            showNotification('Sound uploaded successfully!');
+            fileInput.value = '';
+            renderSounds();
+        } else {
+            const error = await response.json();
+            showNotification(`Upload failed: ${error.error}`, 'error');
+        }
+    }
+    
+    async function clearHistory() {
+        if (!confirm('ARE YOU SURE?\nThis will permanently delete all spin history.')) return;
+        const response = await fetch('/api/stats', { method: 'DELETE' });
+        if (response.ok) {
+            showNotification('Spin history cleared successfully!');
+            loadDashboardData();
+        } else {
+            showNotification('Failed to clear history.', 'error');
+        }
+    }
+
+    // --- INITIALIZATION & SOCKETS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        socket = io();
+        socket.on('connect', () => console.log('Dashboard connected'));
+        socket.on('state_update', (data) => {
+            if (data.stats) updateStats(data.stats);
+            if (data.history) renderHistory(data.history);
+        });
+        
+        loadDashboardData();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize Wheel - Probability Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-1: #ffd700; --gold-2: #ffb300; --royal-purple: #6B46C1;
+            --danger: #dc3545; --success: #28a745; --warning: #ffc107; --info: #0dcaf0;
+            --dark-bg: #0a0a0f; --card-bg: rgba(42,26,78,0.3); --card-bg-solid: #1a1a2e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a0033 35%, #000622 100%);
+            color: #fff; font-family: 'Montserrat', sans-serif; min-height: 100vh; padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px solid var(--gold-2); text-align: center; }
+        .header h1 { font-family: 'Cinzel', serif; font-size: 32px; color: var(--gold-1); margin-bottom: 10px; }
+        .header p { color: rgba(255,255,255,0.8); }
+        .nav-links { margin-top: 15px; }
+        .nav-links a { color: var(--gold-2); text-decoration: none; margin: 0 10px; padding: 8px 16px; border: 1px solid rgba(255,179,0,0.3); border-radius: 5px; transition: all 0.3s ease; }
+        .nav-links a:hover { background: rgba(255,179,0,0.1); }
+
+        .main-content { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        
+        .section { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,215,0,0.3); margin-bottom: 20px; }
+        .section-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold-1); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,215,0,0.3); }
+
+        .prizes-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .prizes-table th, .prizes-table td { padding: 12px; text-align: left; vertical-align: middle; }
+        .prizes-table th { color: var(--gold-2); background: rgba(0,0,0,0.3); font-weight: 600; }
+        .prizes-table tr { background: rgba(0,0,0,0.2); transition: all 0.3s ease; }
+        .prizes-table tr:hover { background: rgba(255,215,0,0.1); }
+        .prizes-table tr.winner-prize { border-left: 4px solid var(--success); }
+        .prizes-table tr.loser-prize { border-left: 4px solid var(--warning); }
+
+        .prize-color { width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 10px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; }
+        
+        .weight-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); color: white; padding: 8px; border-radius: 5px; width: 80px; text-align: center; font-family: 'Montserrat', sans-serif; }
+        .weight-input:focus { outline: none; border-color: var(--gold-1); }
+
+        .probability-bar { 
+            width: 100%; height: 20px; background: rgba(0,0,0,0.3); border-radius: 10px; 
+            overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .probability-fill { 
+            height: 100%; background: linear-gradient(90deg, var(--success), var(--warning)); 
+            transition: width 0.3s ease; position: relative;
+        }
+        .probability-text { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 12px; font-weight: 600; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: 800; color: var(--gold-1); }
+        .stat-label { font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; margin-top: 5px; }
+
+        .btn { 
+            padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; 
+            transition: all 0.3s ease; margin: 5px; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; 
+            font-family: 'Montserrat', sans-serif;
+        }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-primary { background: var(--royal-purple); color: white; }
+        .btn-warning { background: var(--warning); color: black; }
+        .btn-info { background: var(--info); color: black; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .controls { background: rgba(255,215,0,0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .controls h3 { color: var(--gold-1); margin-bottom: 15px; font-family: 'Cinzel', serif; }
+
+        .notification { 
+            position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 15px 20px; 
+            border-radius: 8px; font-weight: 600; animation: slideIn 0.3s ease-out; 
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .winner-highlight { background: linear-gradient(90deg, rgba(40,167,69,0.3), rgba(40,167,69,0.1)) !important; }
+        .loser-highlight { background: linear-gradient(90deg, rgba(255,193,7,0.3), rgba(255,193,7,0.1)) !important; }
+
+        .probability-summary { background: rgba(255,215,0,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .probability-summary h4 { color: var(--gold-1); margin-bottom: 10px; font-family: 'Cinzel', serif; }
+
+        .enabled-toggle { margin-left: 10px; }
+        .enabled-toggle input[type="checkbox"] { 
+            width: 20px; height: 20px; accent-color: var(--success); 
+        }
+
+        .prize-name { font-weight: 600; }
+        .prize-disabled { opacity: 0.5; }
+
+        .chart-container { height: 200px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin: 10px 0; position: relative; }
+        #chartCanvas { width: 100%; height: 100%; border-radius: 5px; }
+
+        .simulation-section { margin-top: 20px; }
+        .simulation-results { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .result-item:last-child { border-bottom: none; }
+
+        .loading { opacity: 0.6; pointer-events: none; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: rgba(255,255,255,0.8); }
+        .form-group input, .form-group select { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); color: white; padding: 10px; border-radius: 5px; font-family: 'Montserrat', sans-serif; width: 100%; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--gold-1); }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Prize Wheel Probability Calculator</h1>
+            <p>Analyze and adjust prize weights to control winning odds</p>
+            <div class="nav-links">
+                <a href="/">Display Page</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/odds">Odds Calculator</a>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div>
+                <div class="section">
+                    <h2 class="section-title">Prize Probability Editor</h2>
+                    
+                    <div class="controls">
+                        <h3>Quick Actions</h3>
+                        <button class="btn btn-success" onclick="saveChanges()" id="saveBtn">Save All Changes</button>
+                        <button class="btn btn-primary" onclick="resetToOriginal()">Reset to Original</button>
+                        <button class="btn btn-warning" onclick="normalizeWeights()">Normalize Weights</button>
+                        <button class="btn btn-info" onclick="loadCurrentData()">Reload Data</button>
+                    </div>
+
+                    <div class="probability-summary" id="probabilitySummary">
+                        <h4>Overall Probability Summary</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalWinChance">0%</div>
+                                <div class="stat-label">Total Win Chance</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalLoseChance">0%</div>
+                                <div class="stat-label">Total Lose Chance</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalWeight">0</div>
+                                <div class="stat-label">Total Weight</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="enabledPrizes">0</div>
+                                <div class="stat-label">Enabled Prizes</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="prizes-table" id="prizesTable">
+                            <thead>
+                                <tr>
+                                    <th>Prize</th>
+                                    <th>Weight</th>
+                                    <th>Probability</th>
+                                    <th>Type</th>
+                                    <th>Enabled</th>
+                                </tr>
+                            </thead>
+                            <tbody id="prizesBody">
+                                <!-- Prizes will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Probability Tools</h2>
+                    
+                    <div class="controls">
+                        <h3>Weight Presets</h3>
+                        <button class="btn btn-primary" onclick="setEqualWeights()">Equal Weights</button>
+                        <button class="btn btn-success" onclick="setWinnerFocus()">Winner Focus</button>
+                        <button class="btn btn-warning" onclick="setLoserFocus()">Loser Focus</button>
+                    </div>
+
+                    <div class="simulation-section">
+                        <h3 style="color: var(--gold-1); margin-bottom: 15px; font-family: 'Cinzel', serif;">Simulation Testing</h3>
+                        <div class="form-group">
+                            <label for="simulationCount">Number of Simulations</label>
+                            <select id="simulationCount">
+                                <option value="100">100 spins</option>
+                                <option value="1000" selected>1,000 spins</option>
+                                <option value="5000">5,000 spins</option>
+                                <option value="10000">10,000 spins</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-info" onclick="runSimulation()" id="simulateBtn">Run Simulation</button>
+                        
+                        <div id="simulationResults" class="simulation-results" style="display: none;">
+                            <h4 style="color: var(--gold-1); margin-bottom: 10px;">Simulation Results</h4>
+                            <div id="simulationData"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section">
+                    <h2 class="section-title">Statistics</h2>
+                    
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="expectedSpinsToWin">0</div>
+                        <div class="stat-label">Expected Spins to Win</div>
+                    </div>
+
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="mostLikelyPrize">-</div>
+                        <div class="stat-label">Most Likely Prize</div>
+                    </div>
+
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="leastLikelyPrize">-</div>
+                        <div class="stat-label">Least Likely Prize</div>
+                    </div>
+
+                    <div class="probability-summary">
+                        <h4>Probability Distribution</h4>
+                        <div class="chart-container">
+                            <canvas id="chartCanvas" width="300" height="180"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Advanced Analysis</h2>
+                    
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="winnerPrizeCount">0</div>
+                        <div class="stat-label">Winner Prizes</div>
+                    </div>
+
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="loserPrizeCount">0</div>
+                        <div class="stat-label">Loser Prizes</div>
+                    </div>
+
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="averageWeight">0</div>
+                        <div class="stat-label">Average Weight</div>
+                    </div>
+
+                    <div class="stat-item" style="margin-bottom: 15px;">
+                        <div class="stat-value" id="weightVariance">0</div>
+                        <div class="stat-label">Weight Variance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass server data to JavaScript -->
+    <script>
+        console.log('Odds Calculator Template Loaded');
+        
+        {% if prizes %}
+        window.INITIAL_PRIZES_DATA = {{ prizes | tojson | safe }};
+        console.log('Server provided initial prizes:', window.INITIAL_PRIZES_DATA);
+        {% else %}
+        window.INITIAL_PRIZES_DATA = [];
+        console.log('No initial prizes data from server');
+        {% endif %}
+    </script>
+
+    <script>
+        let prizes = [];
+        let originalPrizes = [];
+        let hasUnsavedChanges = false;
+
+        // Load prizes data with enhanced error handling
+        async function loadCurrentData() {
+            try {
+                showLoading(true);
+                console.log('Loading prizes data...');
+                
+                // Try the dedicated odds API endpoint first
+                let response = await fetch('/api/odds/prizes');
+                if (!response.ok) {
+                    console.warn(`Odds API failed (${response.status}), trying main prizes API...`);
+                    // Fallback to main prizes API
+                    response = await fetch('/api/prizes');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (data.success === false) {
+                    throw new Error(data.error || 'API returned error');
+                }
+                
+                prizes = data.prizes || [];
+                console.log(`Loaded ${prizes.length} prizes:`, prizes);
+                
+                // Validate prize data
+                prizes = prizes.map(prize => ({
+                    id: prize.id || 'temp_' + Math.random().toString(36).substr(2, 9),
+                    name: prize.name || 'Unknown Prize',
+                    description: prize.description || '',
+                    weight: parseFloat(prize.weight) || 1.0,
+                    color: prize.color || '#4CAF50',
+                    is_winner: Boolean(prize.is_winner),
+                    enabled: prize.enabled !== false, // Default to true if not specified
+                    sound_path: prize.sound_path || ''
+                }));
+                
+                originalPrizes = JSON.parse(JSON.stringify(prizes)); // Deep copy
+                hasUnsavedChanges = false;
+                updateSaveButtonState();
+                
+                renderPrizes();
+                calculateStatistics();
+                
+                if (prizes.length === 0) {
+                    showNotification('No prizes found. Please add prizes from the dashboard first.', 'error');
+                } else {
+                    showNotification(`Successfully loaded ${prizes.length} prizes!`);
+                }
+                
+            } catch (error) {
+                console.error('Error loading prizes:', error);
+                showNotification('Error loading prizes: ' + error.message, 'error');
+                
+                // Try to show some helpful debugging info
+                console.log('Debugging info:');
+                console.log('- Current URL:', window.location.href);
+                console.log('- Fetch URL:', '/api/odds/prizes');
+                
+                // Set empty state
+                prizes = [];
+                originalPrizes = [];
+                renderPrizes();
+                calculateStatistics();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Render prizes table
+        function renderPrizes() {
+            const tbody = document.getElementById('prizesBody');
+            tbody.innerHTML = '';
+
+            if (prizes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; color: rgba(255,255,255,0.6);">No prizes found. Please add prizes from the dashboard first.</td></tr>';
+                return;
+            }
+
+            const enabledPrizes = prizes.filter(p => p.enabled);
+            const totalWeight = enabledPrizes.reduce((sum, p) => sum + parseFloat(p.weight || 0), 0);
+
+            prizes.forEach((prize, index) => {
+                const probability = prize.enabled && totalWeight > 0 ? (parseFloat(prize.weight || 0) / totalWeight) * 100 : 0;
+                const row = document.createElement('tr');
+                row.className = `${prize.is_winner ? 'winner-prize winner-highlight' : 'loser-prize loser-highlight'} ${!prize.enabled ? 'prize-disabled' : ''}`;
+                
+                row.innerHTML = `
+                    <td>
+                        <span class="prize-color" style="background-color:${prize.color || '#4CAF50'}"></span>
+                        <span class="prize-name">${escapeHtml(prize.name || 'Unnamed Prize')}</span>
+                    </td>
+                    <td>
+                        <input type="number" class="weight-input" value="${prize.weight || 0}" 
+                               onchange="updateWeight(${index}, this.value)" min="0" step="0.1"
+                               ${!prize.enabled ? 'disabled' : ''}>
+                    </td>
+                    <td>
+                        <div class="probability-bar">
+                            <div class="probability-fill" style="width: ${Math.min(probability, 100)}%; background: ${prize.is_winner ? 'var(--success)' : 'var(--warning)'}"></div>
+                            <div class="probability-text">${probability.toFixed(2)}%</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="color: ${prize.is_winner ? 'var(--success)' : 'var(--warning)'}; font-weight: 600;">
+                            ${prize.is_winner ? 'Winner' : 'Loser'}
+                        </span>
+                    </td>
+                    <td>
+                        <label class="enabled-toggle">
+                            <input type="checkbox" ${prize.enabled ? 'checked' : ''} 
+                                   onchange="toggleEnabled(${index}, this.checked)">
+                        </label>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update prize weight
+        function updateWeight(index, newWeight) {
+            const weight = parseFloat(newWeight) || 0;
+            if (weight < 0) return;
+            
+            prizes[index].weight = weight;
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+            renderPrizes();
+            calculateStatistics();
+        }
+
+        // Toggle prize enabled status
+        function toggleEnabled(index, enabled) {
+            prizes[index].enabled = enabled;
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+            renderPrizes();
+            calculateStatistics();
+        }
+
+        // Calculate and display statistics
+        function calculateStatistics() {
+            const enabledPrizes = prizes.filter(p => p.enabled);
+            const totalWeight = enabledPrizes.reduce((sum, p) => sum + parseFloat(p.weight || 0), 0);
+            
+            const winnerPrizes = enabledPrizes.filter(p => p.is_winner);
+            const loserPrizes = enabledPrizes.filter(p => !p.is_winner);
+            
+            const winnerWeight = winnerPrizes.reduce((sum, p) => sum + parseFloat(p.weight || 0), 0);
+            const loserWeight = loserPrizes.reduce((sum, p) => sum + parseFloat(p.weight || 0), 0);
+            
+            const winChance = totalWeight > 0 ? (winnerWeight / totalWeight) * 100 : 0;
+            const loseChance = totalWeight > 0 ? (loserWeight / totalWeight) * 100 : 0;
+            
+            // Update main stats
+            document.getElementById('totalWinChance').textContent = winChance.toFixed(1) + '%';
+            document.getElementById('totalLoseChance').textContent = loseChance.toFixed(1) + '%';
+            document.getElementById('totalWeight').textContent = totalWeight.toFixed(1);
+            document.getElementById('enabledPrizes').textContent = enabledPrizes.length;
+            
+            // Expected spins to win
+            const expectedSpins = winChance > 0 ? Math.round(100 / winChance) : '∞';
+            document.getElementById('expectedSpinsToWin').textContent = expectedSpins;
+            
+            // Most and least likely prizes
+            if (enabledPrizes.length > 0) {
+                const probabilities = enabledPrizes.map(p => ({
+                    name: p.name,
+                    probability: totalWeight > 0 ? parseFloat(p.weight) / totalWeight : 0
+                }));
+                
+                probabilities.sort((a, b) => b.probability - a.probability);
+                document.getElementById('mostLikelyPrize').textContent = probabilities[0]?.name || '-';
+                document.getElementById('leastLikelyPrize').textContent = probabilities[probabilities.length - 1]?.name || '-';
+            } else {
+                document.getElementById('mostLikelyPrize').textContent = '-';
+                document.getElementById('leastLikelyPrize').textContent = '-';
+            }
+
+            // Advanced stats
+            document.getElementById('winnerPrizeCount').textContent = winnerPrizes.length;
+            document.getElementById('loserPrizeCount').textContent = loserPrizes.length;
+            
+            const averageWeight = enabledPrizes.length > 0 ? totalWeight / enabledPrizes.length : 0;
+            document.getElementById('averageWeight').textContent = averageWeight.toFixed(1);
+            
+            // Calculate variance
+            const variance = enabledPrizes.length > 0 ? 
+                enabledPrizes.reduce((sum, p) => sum + Math.pow(parseFloat(p.weight) - averageWeight, 2), 0) / enabledPrizes.length : 0;
+            document.getElementById('weightVariance').textContent = variance.toFixed(1);
+
+            drawChart();
+        }
+
+        // Draw probability chart
+        function drawChart() {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+            const enabledPrizes = prizes.filter(p => p.enabled);
+            const totalWeight = enabledPrizes.reduce((sum, p) => sum + parseFloat(p.weight || 0), 0);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (enabledPrizes.length === 0 || totalWeight === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Montserrat';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data to display', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // Sort prizes by probability for better visualization
+            const sortedPrizes = [...enabledPrizes].sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight));
+            const barWidth = Math.max(canvas.width / sortedPrizes.length - 2, 20);
+            const maxBarHeight = canvas.height * 0.7;
+
+            sortedPrizes.forEach((prize, index) => {
+                const probability = parseFloat(prize.weight) / totalWeight;
+                const barHeight = probability * maxBarHeight;
+                const x = index * (barWidth + 2);
+                const y = canvas.height - barHeight - 20;
+                
+                // Draw bar
+                ctx.fillStyle = prize.color || (prize.is_winner ? '#28a745' : '#ffc107');
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // Draw percentage label
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 10px Montserrat';
+                ctx.textAlign = 'center';
+                
+                if (barHeight > 20) {
+                    // Label inside bar if tall enough
+                    ctx.fillText(
+                        (probability * 100).toFixed(1) + '%',
+                        x + barWidth / 2,
+                        y + barHeight / 2
+                    );
+                } else {
+                    // Label above bar if too short
+                    ctx.fillText(
+                        (probability * 100).toFixed(1) + '%',
+                        x + barWidth / 2,
+                        y - 5
+                    );
+                }
+
+                // Draw prize name (abbreviated if necessary)
+                ctx.font = '8px Montserrat';
+                ctx.fillStyle = '#ccc';
+                let displayName = prize.name;
+                if (displayName.length > 8) {
+                    displayName = displayName.substring(0, 6) + '...';
+                }
+                ctx.fillText(displayName, x + barWidth / 2, canvas.height - 5);
+            });
+        }
+
+        // Simulation functions
+        async function runSimulation() {
+            const simulationCount = parseInt(document.getElementById('simulationCount').value);
+            const simulateBtn = document.getElementById('simulateBtn');
+            const resultsDiv = document.getElementById('simulationResults');
+            
+            try {
+                simulateBtn.disabled = true;
+                simulateBtn.textContent = 'Running...';
+                showLoading(true);
+
+                const response = await fetch('/api/odds/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ simulations: simulationCount })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                displaySimulationResults(data);
+                resultsDiv.style.display = 'block';
+                
+                showNotification(`Simulation completed: ${simulationCount} spins analyzed!`);
+            } catch (error) {
+                showNotification('Simulation failed: ' + error.message, 'error');
+            } finally {
+                simulateBtn.disabled = false;
+                simulateBtn.textContent = 'Run Simulation';
+                showLoading(false);
+            }
+        }
+
+        function displaySimulationResults(data) {
+            const container = document.getElementById('simulationData');
+            const winRate = data.win_rate || 0;
+            
+            let html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
+                    <strong>Simulation Summary</strong><br>
+                    <span style="color: var(--success);">Win Rate: ${winRate.toFixed(2)}%</span> | 
+                    <span style="color: var(--info);">Total Winners: ${data.total_winners}</span> | 
+                    <span style="color: var(--warning);">Total Spins: ${data.simulations}</span>
+                </div>
+                <div style="max-height: 200px; overflow-y: auto;">
+            `;
+
+            data.results.sort((a, b) => b.actual_percentage - a.actual_percentage);
+
+            data.results.forEach(result => {
+                const difference = result.actual_percentage - result.expected_percentage;
+                const diffColor = Math.abs(difference) < 1 ? '#28a745' : Math.abs(difference) < 5 ? '#ffc107' : '#dc3545';
+                
+                html += `
+                    <div class="result-item">
+                        <div>
+                            <strong>${escapeHtml(result.name)}</strong>
+                            <br><small style="color: ${result.is_winner ? 'var(--success)' : 'var(--warning)'}">
+                                ${result.is_winner ? 'Winner' : 'Loser'}
+                            </small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div><strong>${result.actual_percentage.toFixed(2)}%</strong> (${result.count})</div>
+                            <div style="font-size: 11px; color: ${diffColor}">
+                                Expected: ${result.expected_percentage.toFixed(2)}%
+                                <br>Diff: ${difference > 0 ? '+' : ''}${difference.toFixed(2)}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Utility functions
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+            notification.style.color = 'white';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 4000);
+        }
+
+        function showLoading(show) {
+            const container = document.querySelector('.container');
+            container.classList.toggle('loading', show);
+        }
+
+        function updateSaveButtonState() {
+            const saveBtn = document.getElementById('saveBtn');
+            if (hasUnsavedChanges) {
+                saveBtn.style.background = 'var(--warning)';
+                saveBtn.style.color = 'black';
+                saveBtn.textContent = 'Save Changes*';
+            } else {
+                saveBtn.style.background = 'var(--success)';
+                saveBtn.style.color = 'white';
+                saveBtn.textContent = 'All Saved';
+            }
+        }
+
+        // Action functions
+        async function saveChanges() {
+            if (!hasUnsavedChanges) {
+                showNotification('No changes to save');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            
+            try {
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+                showLoading(true);
+
+                let savedCount = 0;
+                let errorCount = 0;
+
+                for (const prize of prizes) {
+                    try {
+                        const response = await fetch(`/api/prizes/${prize.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(prize)
+                        });
+                        
+                        if (response.ok) {
+                            savedCount++;
+                        } else {
+                            errorCount++;
+                            console.error(`Failed to update ${prize.name}`);
+                        }
+                    } catch (error) {
+                        errorCount++;
+                        console.error(`Error updating ${prize.name}:`, error);
+                    }
+                }
+
+                if (errorCount === 0) {
+                    showNotification(`All ${savedCount} prizes saved successfully!`);
+                    originalPrizes = JSON.parse(JSON.stringify(prizes)); // Update original
+                    hasUnsavedChanges = false;
+                    updateSaveButtonState();
+                } else {
+                    showNotification(`Saved ${savedCount} prizes, ${errorCount} failed`, 'error');
+                }
+            } catch (error) {
+                showNotification('Error saving changes: ' + error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+                showLoading(false);
+            }
+        }
+
+        function resetToOriginal() {
+            if (!hasUnsavedChanges || confirm('Are you sure you want to discard all unsaved changes?')) {
+                prizes = JSON.parse(JSON.stringify(originalPrizes));
+                hasUnsavedChanges = false;
+                updateSaveButtonState();
+                renderPrizes();
+                calculateStatistics();
+                showNotification('Reset to original values');
+            }
+        }
+
+        function normalizeWeights() {
+            const enabledPrizes = prizes.filter(p => p.enabled);
+            if (enabledPrizes.length === 0) {
+                showNotification('No enabled prizes to normalize', 'error');
+                return;
+            }
+            
+            const totalWeight = enabledPrizes.reduce((sum, p) => sum + parseFloat(p.weight || 0), 0);
+            if (totalWeight === 0) {
+                showNotification('Cannot normalize: total weight is zero', 'error');
+                return;
+            }
+            
+            prizes.forEach(prize => {
+                if (prize.enabled) {
+                    prize.weight = parseFloat((parseFloat(prize.weight) / totalWeight * 100).toFixed(2));
+                }
+            });
+            
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+            renderPrizes();
+            calculateStatistics();
+            showNotification('Weights normalized to sum to 100');
+        }
+
+        function setEqualWeights() {
+            const enabledCount = prizes.filter(p => p.enabled).length;
+            if (enabledCount === 0) {
+                showNotification('No enabled prizes found', 'error');
+                return;
+            }
+            
+            const equalWeight = parseFloat((100 / enabledCount).toFixed(2));
+            prizes.forEach(prize => {
+                if (prize.enabled) {
+                    prize.weight = equalWeight;
+                }
+            });
+            
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+            renderPrizes();
+            calculateStatistics();
+            showNotification('Set equal weights for all enabled prizes');
+        }
+
+        function setWinnerFocus() {
+            const enabledPrizes = prizes.filter(p => p.enabled);
+            if (enabledPrizes.length === 0) {
+                showNotification('No enabled prizes found', 'error');
+                return;
+            }
+
+            prizes.forEach(prize => {
+                if (prize.enabled) {
+                    prize.weight = prize.is_winner ? 10 : 1;
+                }
+            });
+            
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+            renderPrizes();
+            calculateStatistics();
+            showNotification('Set winner-focused weights (10:1 ratio)');
+        }
+
+        function setLoserFocus() {
+            const enabledPrizes = prizes.filter(p => p.enabled);
+            if (enabledPrizes.length === 0) {
+                showNotification('No enabled prizes found', 'error');
+                return;
+            }
+
+            prizes.forEach(prize => {
+                if (prize.enabled) {
+                    prize.weight = prize.is_winner ? 1 : 10;
+                }
+            });
+            
+            hasUnsavedChanges = true;
+            updateSaveButtonState();
+            renderPrizes();
+            calculateStatistics();
+            showNotification('Set loser-focused weights (1:10 ratio)');
+        }
+
+        // Prevent accidental navigation with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveChanges();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        resetToOriginal();
+                        break;
+                }
+            }
+        });
+
+        // Initialize with debugging
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Odds Calculator Initializing...');
+            console.log('Debug Info:');
+            console.log('- Page URL:', window.location.href);
+            console.log('- Document ready state:', document.readyState);
+            
+            // Check if server passed any initial data
+            if (window.INITIAL_PRIZES_DATA) {
+                console.log('Found server-side prizes data:', window.INITIAL_PRIZES_DATA);
+                prizes = window.INITIAL_PRIZES_DATA;
+                originalPrizes = JSON.parse(JSON.stringify(prizes));
+                renderPrizes();
+                calculateStatistics();
+            }
+            
+            // Always try to load fresh data from API
+            loadCurrentData();
+            
+            // Auto-save reminder
+            setInterval(() => {
+                if (hasUnsavedChanges) {
+                    const saveBtn = document.getElementById('saveBtn');
+                    if (saveBtn) {
+                        saveBtn.style.animation = 'pulse 1s ease-in-out';
+                        setTimeout(() => {
+                            saveBtn.style.animation = '';
+                        }, 1000);
+                    }
+                }
+            }, 30000); // Remind every 30 seconds
+        });
+    </script>
+</body>
+</html>
